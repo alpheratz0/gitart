@@ -7,7 +7,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <time.h>
-#include "font.h"
+#include "fo.c"
 
 static void
 die(const char *fmt, ...)
@@ -108,7 +108,7 @@ gitart(const char *dir, const char *text, int intensity)
 {
 	git_repository *repo;
 	git_signature *sig;
-	const struct font_glyph *glyph;
+	unsigned char *glyph;
 	size_t i;
 	int caret, gx, gy;
 
@@ -128,14 +128,12 @@ gitart(const char *dir, const char *text, int intensity)
 
 	for (i = 0; i < strlen(text); ++i) {
 		printf("rendering glyph: %c\n", text[i]);
-		glyph = font_get_glyph(text[i], true);
-		if (NULL != glyph) {
-			for (gy = 0; gy < glyph->height; ++gy)
-				for (gx = 0; gx < glyph->width; ++gx)
-					if (glyph->bitmap[gy*glyph->width+gx] == 1)
-						set_pixel(repo, sig, caret + gx, 7 - glyph->height + gy, intensity);
-			caret += glyph->width + 1;
-		}
+		glyph = five_by_seven + text[i]*7;
+		for (gy = 0; gy < 7; ++gy)
+			for (gx = 0; gx < 5; ++gx)
+				if (glyph[gy] & (1 << (4 - gx)))
+					set_pixel(repo, sig, caret + gx, gy, intensity);
+		caret += 6;
 	}
 
 	git_signature_free(sig);

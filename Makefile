@@ -5,11 +5,11 @@ include config.mk
 
 all: gitart
 
-gitart: gitart.o font.o
-	$(CC) $(LDFLAGS) -o gitart gitart.o font.o $(LDLIBS)
+gitart: gitart.o
+	$(CC) $(LDFLAGS) -o gitart gitart.o $(LDLIBS)
 
 clean:
-	rm -f gitart gitart.o font.o gitart-$(VERSION).tar.gz
+	rm -f gitart gitart.o gitart-$(VERSION).tar.gz
 
 install: all
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
@@ -21,7 +21,7 @@ install: all
 
 dist: clean
 	mkdir -p gitart-$(VERSION)
-	cp -R COPYING config.mk Makefile README gitart.1 gitart.c font.h font.c gitart-$(VERSION)
+	cp -R COPYING config.mk Makefile README gitart.1 gitart.c fo.c gitart-$(VERSION)
 	tar -cf gitart-$(VERSION).tar gitart-$(VERSION)
 	gzip gitart-$(VERSION).tar
 	rm -rf gitart-$(VERSION)
