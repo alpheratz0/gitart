@@ -1,0 +1,37 @@
+.Dd September 21, 2022
+.Dt GITART 1
+.Sh NAME
+.Nm gitart
+.Nd github contribution history text renderer
+.Sh SYNOPSIS
+.Nm
+.Op Fl hv
+.Op Fl d Ar dirname
+.Op Fl i Ar intensity
+.Op Ar text
+.Sh DESCRIPTION
+The
+.Nm
+utility lets you render text to your github contribution history.
+.Sh OPTIONS
+.Bl -tag -width indent
+.It Fl h
+show usage
+.It Fl v
+display the program version
+.It Fl d
+set the name of the directory to place the git repository
+.It Fl i
+set commit intensity
+.El
+.Sh EXAMPLES
+.Bl -tag -width indent
+.It create a git repository inside art directory that renders "hello world"
+gitart -d art "Hello world"
+.El
+.Sh SEE ALSO
+.Xr git 1
+.Sh AUTHORS
+.An alpheratz0 Aq Mt alpheratz99@protonmail.com
+.Sh BUGS
+https://github.com/alpheratz0/gitart/issues
