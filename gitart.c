@@ -24,6 +24,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <time.h>
+
 #include "fo.c"
 
 static void
