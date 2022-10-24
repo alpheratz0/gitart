@@ -27,6 +27,9 @@
 
 #include "fo.c"
 
+#define GIT_ERROR(fn) \
+	die(fn " failed: %s", git_error_last()->message)
+
 static void
 die(const char *fmt, ...)
 {
@@ -72,13 +75,13 @@ add_new_commit(git_repository *repo, git_signature *sig)
 	git_index *index;
 
 	if (git_repository_index(&index, repo) < 0)
-		die("git_repository_index failed: %s", git_error_last()->message);
+		GIT_ERROR("git_repository_index");
 
 	if (git_index_write_tree(&tid, index) < 0)
-		die("git_index_write_tree failed: %s", git_error_last()->message);
+		GIT_ERROR("git_index_write_tree");
 
 	if (git_tree_lookup(&tree, repo, &tid) < 0)
-		die("git_tree_lookup failed: %s", git_error_last()->message);
+		GIT_ERROR("git_tree_lookup");
 
 	git_index_free(index);
 
@@ -86,22 +89,22 @@ add_new_commit(git_repository *repo, git_signature *sig)
 		case 0:
 			nparents = 1;
 			if (git_reference_name_to_id(&pid, repo, "HEAD") < 0)
-				die("git_reference_name_to_id failed: %s", git_error_last()->message);
+				GIT_ERROR("git_reference_name_to_id");
 			if (git_commit_lookup(&parent, repo, &pid) < 0)
-				die("git_commit_lookup failed: %s", git_error_last()->message);
+				GIT_ERROR("git_commit_lookup");
 			break;
 		case 1:
 			nparents = 0;
 			parent = NULL;
 			break;
 		default:
-			die("git_repository_head_unborn failed: %s", git_error_last()->message);
+			GIT_ERROR("git_repository_head_unborn");
 			break;
 	}
 
 	if (git_commit_create_v(&cid, repo, "HEAD", sig, sig,
 				"UTF-8", "gitart", tree, nparents, parent) < 0)
-		die("git_commit_create_v failed: %s", git_error_last()->message);
+		GIT_ERROR("git_commit_create_v");
 
 	git_tree_free(tree);
 }
@@ -134,13 +137,13 @@ gitart(const char *dir, const char *text, int intensity)
 		die("mkdir failed: %s", strerror(errno));
 
 	if (git_libgit2_init() < 0)
-		die("git_libgit2_init failed: %s", git_error_last()->message);
+		GIT_ERROR("git_libgit2_init");
 
 	if (git_repository_init(&repo, dir, false) < 0)
-		die("git_repository_init failed: %s", git_error_last()->message);
+		GIT_ERROR("git_repository_init");
 
 	if (git_signature_default(&sig, repo) < 0)
-		die("git_signature_default failed: %s", git_error_last()->message);
+		GIT_ERROR("git_signature_default");
 
 	caret = 0;
 
