@@ -54,7 +54,7 @@ enotnull(const char *str, const char *name)
 static void
 usage(void)
 {
-	puts("usage: gitart [-hv] [-d dirname] [-i intensity] [text]");
+	puts("usage: gitart [-hv] [-d dirname] [-i intensity] [-w week_offset] [text]");
 	exit(0);
 }
 
@@ -125,7 +125,7 @@ set_pixel(git_repository *repo, git_signature *sig, int x, int y, int intensity)
 }
 
 static void
-gitart(const char *dir, const char *text, int intensity)
+gitart(const char *dir, const char *text, int intensity, int week_offset)
 {
 	git_repository *repo;
 	git_signature *sig;
@@ -145,7 +145,7 @@ gitart(const char *dir, const char *text, int intensity)
 	if (git_signature_default(&sig, repo) < 0)
 		GIT_ERROR("git_signature_default");
 
-	caret = 0;
+	caret = week_offset;
 
 	for (i = 0; i < strlen(text); ++i) {
 		printf("rendering glyph: %c\n", text[i]);
@@ -166,8 +166,9 @@ int
 main(int argc, char **argv)
 {
 	const char *dir, *text;
-	int intensity;
+	int intensity, week_offset;
 
+	week_offset = 0;
 	intensity = 100;
 	text = NULL;
 	dir = "art";
@@ -179,6 +180,7 @@ main(int argc, char **argv)
 				case 'v': version(); break;
 				case 'i': --argc; intensity = atoi(enotnull(*++argv, "intensity")); break;
 				case 'd': --argc; dir = enotnull(*++argv, "dirname"); break;
+				case 'w': --argc; week_offset = atoi(enotnull(*++argv, "week offset")); break;
 				default: die("invalid option %s", *argv); break;
 			}
 		} else {
@@ -194,7 +196,7 @@ main(int argc, char **argv)
 	if (intensity < 1)
 		intensity = 10;
 
-	gitart(dir, text, intensity);
+	gitart(dir, text, intensity, week_offset);
 
 	return 0;
 }
