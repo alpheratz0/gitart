@@ -106,6 +106,9 @@ add_new_commit(git_repository *repo, git_signature *sig)
 				"UTF-8", "gitart", tree, nparents, parent) < 0)
 		GIT_ERROR("git_commit_create_v");
 
+	if (NULL != parent)
+		git_commit_free(parent);
+
 	git_tree_free(tree);
 }
 
