@@ -30,6 +30,8 @@
 #define GIT_ERROR(fn) \
 	die(fn " failed: %s", git_error_last()->message)
 
+#define SECONDS_PER_DAY (60 * 60 * 24)
+
 static void
 die(const char *fmt, ...)
 {
@@ -113,15 +115,13 @@ add_new_commit(git_repository *repo, git_signature *sig)
 }
 
 static void
-set_pixel(git_repository *repo, git_signature *sig, int x, int y, int intensity)
+set_pixel(git_repository *repo, git_signature *sig, time_t origin,
+		int x, int y, int intensity)
 {
-	time_t t;
-	struct tm *now;
+	int day_offset;
 
-	t = time(NULL);
-	now = localtime(&t);
-
-	sig->when.time = t - 60 * 60 * 24 * (now->tm_wday + (52 - x) * 7 - y);
+	day_offset = x * 7 + y;
+	sig->when.time = origin + day_offset * SECONDS_PER_DAY;
 
 	while (intensity-- > 0)
 		add_new_commit(repo, sig);
@@ -130,6 +130,7 @@ set_pixel(git_repository *repo, git_signature *sig, int x, int y, int intensity)
 static void
 gitart(const char *dir, const char *text, int intensity, int week_offset)
 {
+	time_t origin;
 	git_repository *repo;
 	git_signature *sig;
 	unsigned char *glyph;
@@ -148,6 +149,8 @@ gitart(const char *dir, const char *text, int intensity, int week_offset)
 	if (git_signature_default(&sig, repo) < 0)
 		GIT_ERROR("git_signature_default");
 
+	origin = time(NULL);
+	origin = origin - SECONDS_PER_DAY * (localtime(&origin)->tm_wday + 52 * 7);
 	caret = week_offset;
 
 	for (i = 0; i < strlen(text); ++i) {
@@ -156,7 +159,7 @@ gitart(const char *dir, const char *text, int intensity, int week_offset)
 		for (gy = 0; gy < 7; ++gy)
 			for (gx = 0; gx < 5; ++gx)
 				if (glyph[gy] & (1 << (4 - gx)))
-					set_pixel(repo, sig, caret + gx, gy, intensity);
+					set_pixel(repo, sig, origin, caret + gx, gy, intensity);
 		caret += 6;
 	}
 
