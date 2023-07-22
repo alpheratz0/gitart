@@ -32,6 +32,12 @@
 
 #define SECONDS_PER_DAY (60 * 60 * 24)
 
+#define DEFAULT_WEEK_OFFSET 0
+#define DEFAULT_INTENSITY 100
+#define DEFAULT_DIR "art"
+#define DEFAULT_TEXT "gitart"
+#define COMMIT_MESSAGE "gitart"
+
 static void
 die(const char *fmt, ...)
 {
@@ -105,7 +111,7 @@ add_new_commit(git_repository *repo, git_signature *sig)
 	}
 
 	if (git_commit_create_v(&cid, repo, "HEAD", sig, sig,
-				"UTF-8", "gitart", tree, nparents, parent) < 0)
+				"UTF-8", COMMIT_MESSAGE, tree, nparents, parent) < 0)
 		GIT_ERROR("git_commit_create_v");
 
 	if (NULL != parent)
@@ -174,10 +180,10 @@ main(int argc, char **argv)
 	const char *dir, *text;
 	int intensity, week_offset;
 
-	week_offset = 0;
-	intensity = 100;
+	week_offset = DEFAULT_WEEK_OFFSET;
+	intensity = DEFAULT_INTENSITY;
+	dir = DEFAULT_DIR;
 	text = NULL;
-	dir = "art";
 
 	while (++argv, --argc > 0) {
 		if ((*argv)[0] == '-' && (*argv)[1] != '\0' && (*argv)[2] == '\0') {
@@ -197,7 +203,7 @@ main(int argc, char **argv)
 	}
 
 	if (NULL == text)
-		text = "gitart";
+		text = DEFAULT_TEXT;
 
 	if (intensity < 1)
 		intensity = 10;
