@@ -206,7 +206,7 @@ main(int argc, char **argv)
 		text = DEFAULT_TEXT;
 
 	if (intensity < 1)
-		intensity = 10;
+		intensity = 1;
 
 	gitart(dir, text, intensity, week_offset);
 
