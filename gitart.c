@@ -30,13 +30,16 @@
 #define GIT_ERROR(fn) \
 	die(fn " failed: %s", git_error_last()->message)
 
-#define SECONDS_PER_DAY (60 * 60 * 24)
-
-#define DEFAULT_WEEK_OFFSET 0
-#define DEFAULT_INTENSITY 100
 #define DEFAULT_DIR "art"
-#define DEFAULT_TEXT "gitart"
 #define DEFAULT_COMMIT_MESSAGE "gitart"
+#define DEFAULT_TEXT "gitart"
+#define DEFAULT_INTENSITY 100
+#define DEFAULT_WEEK_OFFSET 0
+#define SECONDS_PER_DAY 60*60*24
+
+#ifndef VERSION
+#define VERSION "unknown"
+#endif
 
 static void
 die(const char *fmt, ...)
@@ -49,14 +52,6 @@ die(const char *fmt, ...)
 	va_end(args);
 	fputc('\n', stderr);
 	exit(1);
-}
-
-static const char *
-enotnull(const char *str, const char *name)
-{
-	if (NULL == str)
-		die("%s cannot be null", name);
-	return str;
 }
 
 static void
@@ -75,8 +70,16 @@ version(void)
 	exit(0);
 }
 
+static const char *
+enotnull(const char *str, const char *name)
+{
+	if (NULL == str)
+		die("%s cannot be null", name);
+	return str;
+}
+
 static void
-add_new_commit(git_repository *repo, git_signature *sig, const char *commit_message)
+add_new_commit(git_repository *repo, git_signature *sig, const char *message)
 {
 	git_oid tid, pid, cid;
 	size_t nparents;
@@ -96,24 +99,24 @@ add_new_commit(git_repository *repo, git_signature *sig, const char *commit_mess
 	git_index_free(index);
 
 	switch (git_repository_head_unborn(repo)) {
-		case 0:
-			nparents = 1;
-			if (git_reference_name_to_id(&pid, repo, "HEAD") < 0)
-				GIT_ERROR("git_reference_name_to_id");
-			if (git_commit_lookup(&parent, repo, &pid) < 0)
-				GIT_ERROR("git_commit_lookup");
-			break;
-		case 1:
-			nparents = 0;
-			parent = NULL;
-			break;
-		default:
-			GIT_ERROR("git_repository_head_unborn");
-			break;
+	case 0:
+		nparents = 1;
+		if (git_reference_name_to_id(&pid, repo, "HEAD") < 0)
+			GIT_ERROR("git_reference_name_to_id");
+		if (git_commit_lookup(&parent, repo, &pid) < 0)
+			GIT_ERROR("git_commit_lookup");
+		break;
+	case 1:
+		nparents = 0;
+		parent = NULL;
+		break;
+	default:
+		GIT_ERROR("git_repository_head_unborn");
+		break;
 	}
 
 	if (git_commit_create_v(&cid, repo, "HEAD", sig, sig,
-				"UTF-8", commit_message, tree, nparents, parent) < 0)
+				"UTF-8", message, tree, nparents, parent) < 0)
 		GIT_ERROR("git_commit_create_v");
 
 	if (NULL != parent)
@@ -196,13 +199,13 @@ main(int argc, char **argv)
 	while (++argv, --argc > 0) {
 		if ((*argv)[0] == '-' && (*argv)[1] != '\0' && (*argv)[2] == '\0') {
 			switch ((*argv)[1]) {
-				case 'h': usage(); break;
-				case 'v': version(); break;
-				case 'i': --argc; intensity = atoi(enotnull(*++argv, "intensity")); break;
-				case 'd': --argc; dir = enotnull(*++argv, "dirname"); break;
-				case 'c': --argc; commit_message = enotnull(*++argv, "commit message"); break;
-				case 'w': --argc; week_offset = atoi(enotnull(*++argv, "week offset")); break;
-				default: die("invalid option %s", *argv); break;
+			case 'h': usage(); break;
+			case 'v': version(); break;
+			case 'i': --argc; intensity = atoi(enotnull(*++argv, "intensity")); break;
+			case 'd': --argc; dir = enotnull(*++argv, "dirname"); break;
+			case 'c': --argc; commit_message = enotnull(*++argv, "commit message"); break;
+			case 'w': --argc; week_offset = atoi(enotnull(*++argv, "week offset")); break;
+			default: die("invalid option %s", *argv); break;
 			}
 		} else {
 			if (NULL != text)
