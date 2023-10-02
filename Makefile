@@ -6,7 +6,7 @@ include config.mk
 all: gitart
 
 gitart: gitart.o
-	$(CC) $(LDFLAGS) -o gitart gitart.o $(LDLIBS)
+	$(CC) $(LDFLAGS) -o gitart gitart.o
 
 clean:
 	rm -f gitart gitart.o gitart-$(VERSION).tar.gz
